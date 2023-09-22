@@ -5,6 +5,7 @@ import com.happyzleaf.prefixinator.commands.RefreshPrefixesCommand;
 import com.happyzleaf.prefixinator.listeners.LoginListener;
 import org.bukkit.plugin.java.JavaPlugin;
 
+// TODO config
 public final class Prefixinator extends JavaPlugin {
     public static final String META_GROUP_KEY = "prefixinator-group";
 

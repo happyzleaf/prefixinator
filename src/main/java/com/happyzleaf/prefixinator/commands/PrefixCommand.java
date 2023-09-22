@@ -3,6 +3,7 @@ package com.happyzleaf.prefixinator.commands;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import com.happyzleaf.prefixinator.utils.Utilities;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.LuckPermsProvider;
 import net.luckperms.api.model.group.Group;
@@ -92,7 +93,7 @@ public class PrefixCommand implements TabCompleter, CommandExecutor {
                             String prefix = group.getCachedData().getMetaData().getPrefix();
                             if (prefix == null) return;
                             text.append(
-                                    new ComponentBuilder(ChatColor.DARK_AQUA + "- " + ChatColor.RESET + prefix + "\n")
+                                    new ComponentBuilder(ChatColor.DARK_AQUA + "- " + ChatColor.RESET + Utilities.format(prefix) + "\n")
                                             .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(ChatColor.LIGHT_PURPLE + "Click to apply")))
                                             .event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/prefixinator:prefix " + group.getName()))
                                             .create(),
