@@ -1,0 +1,17 @@
+name: prefixinator
+version: '${version}'
+main: com.happyzleaf.prefixinator.Prefixinator
+api-version: '1.16'
+load: STARTUP
+depend: [ LuckPerms ]
+authors: [ happyz ]
+description: LuckPerms extension to let the players choose their prefix.
+website: https://happyzleaf.com/
+
+commands:
+  prefix:
+    description: Shows all available prefixes, sets the given prefix.
+    usage: /<command> [<group>]
+  refreshprefixes:
+    description: Refreshes all users prefixes.
+    usage: /<command>
