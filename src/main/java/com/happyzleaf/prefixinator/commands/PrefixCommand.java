@@ -3,6 +3,7 @@ package com.happyzleaf.prefixinator.commands;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import com.happyzleaf.prefixinator.config.Config;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.LuckPermsProvider;
 import net.luckperms.api.model.group.Group;
@@ -15,6 +16,7 @@ import net.luckperms.api.query.QueryOptions;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
+import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.chat.hover.content.Text;
 import org.bukkit.ChatColor;
 import org.bukkit.command.*;
@@ -30,6 +32,8 @@ import static com.happyzleaf.prefixinator.Prefixinator.META_GROUP_KEY;
 import static com.happyzleaf.prefixinator.utils.FormatUtil.format;
 
 public class PrefixCommand implements TabCompleter, CommandExecutor {
+    private final Config config;
+
     private final LoadingCache<UUID, List<String>> usersGroupsCache = CacheBuilder.newBuilder()
             .expireAfterWrite(2, TimeUnit.MINUTES)
             .build(new CacheLoader<UUID, List<String>>() {
@@ -53,7 +57,9 @@ public class PrefixCommand implements TabCompleter, CommandExecutor {
                 }
             });
 
-    public PrefixCommand(PluginCommand command) {
+    public PrefixCommand(Config config, PluginCommand command) {
+        this.config = config;
+
         command.setTabCompleter(this);
         command.setExecutor(this);
     }
@@ -85,7 +91,8 @@ public class PrefixCommand implements TabCompleter, CommandExecutor {
 
         switch (args.length) {
             case 0: {
-                ComponentBuilder text = new ComponentBuilder(ChatColor.AQUA + "Available prefixes:\n");
+                ComponentBuilder text = new ComponentBuilder();
+                text.append(this.config.getCommandHeader().c);
                 user.resolveInheritedNodes(NodeType.INHERITANCE, QueryOptions.nonContextual()).stream()
                         .map(n -> luck.getGroupManager().getGroup(n.getGroupName()))
                         .forEach(group -> {
@@ -95,14 +102,14 @@ public class PrefixCommand implements TabCompleter, CommandExecutor {
                             if (prefix == null) return;
 
                             text.append(
-                                    new ComponentBuilder(ChatColor.DARK_AQUA + "- " + ChatColor.RESET)
+                                    new ComponentBuilder("")
                                             .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(ChatColor.LIGHT_PURPLE + "Click to apply")))
                                             .event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/prefixinator:prefix " + group.getName()))
                                             .create()
                             );
-                            text.append(format(prefix));
-                            text.append("\n", ComponentBuilder.FormatRetention.NONE);
+                            text.append(format(this.config.getCommandBody().t.replace("{prefix}", prefix)));
                         });
+                text.append(this.config.getCommandFooter().c);
                 sender.spigot().sendMessage(text.create());
 
                 return true;
@@ -130,7 +137,7 @@ public class PrefixCommand implements TabCompleter, CommandExecutor {
                 user.data().add(PrefixNode.builder(prefix, 9999).build());
                 luck.getUserManager().saveUser(user);
 
-                sender.sendMessage(ChatColor.GREEN + "Prefix set to " + format(prefix) + ChatColor.RESET + ChatColor.GREEN + ".");
+                sender.spigot().sendMessage(format(this.config.getCommandSuccess().t.replace("{prefix}", prefix)));
 
                 return true;
             }
