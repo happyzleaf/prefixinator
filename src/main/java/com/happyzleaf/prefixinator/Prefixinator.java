@@ -10,6 +10,8 @@ import java.util.logging.Level;
 
 public final class Prefixinator extends JavaPlugin {
     public static final String META_GROUP_KEY = "prefixinator-group";
+    public static final int PREFIX_WEIGHT = 9999;
+
     public final Config config;
 
     public Prefixinator() {

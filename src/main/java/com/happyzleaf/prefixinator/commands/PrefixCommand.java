@@ -8,6 +8,7 @@ import net.luckperms.api.LuckPerms;
 import net.luckperms.api.LuckPermsProvider;
 import net.luckperms.api.model.group.Group;
 import net.luckperms.api.model.user.User;
+import net.luckperms.api.node.Node;
 import net.luckperms.api.node.NodeType;
 import net.luckperms.api.node.types.InheritanceNode;
 import net.luckperms.api.node.types.MetaNode;
@@ -25,12 +26,16 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static com.happyzleaf.prefixinator.Prefixinator.META_GROUP_KEY;
+import static com.happyzleaf.prefixinator.Prefixinator.PREFIX_WEIGHT;
 import static com.happyzleaf.prefixinator.utils.FormatUtil.format;
 
 public class PrefixCommand implements TabCompleter, CommandExecutor {
+    public static final Predicate<Node> CLEAR_ALL = n -> n instanceof PrefixNode || (n instanceof MetaNode && META_GROUP_KEY.equals(((MetaNode) n).getMetaKey()));
+
     private final Config config;
 
     private final LoadingCache<UUID, List<String>> usersGroupsCache = CacheBuilder.newBuilder()
@@ -131,9 +136,9 @@ public class PrefixCommand implements TabCompleter, CommandExecutor {
                     return false;
                 }
 
-                user.data().clear(n -> n instanceof PrefixNode || (n instanceof MetaNode && META_GROUP_KEY.equals(((MetaNode) n).getMetaKey())));
+                user.data().clear(CLEAR_ALL);
                 user.data().add(MetaNode.builder(META_GROUP_KEY, group.getName()).build());
-                user.data().add(PrefixNode.builder(prefix, 9999).build());
+                user.data().add(PrefixNode.builder(prefix, PREFIX_WEIGHT).build());
                 luck.getUserManager().saveUser(user);
 
                 sender.spigot().sendMessage(format(this.config.getCommandSuccess().t.replace("{prefix}", prefix)));

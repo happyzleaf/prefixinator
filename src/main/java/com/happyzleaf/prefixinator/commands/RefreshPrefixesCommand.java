@@ -3,10 +3,9 @@ package com.happyzleaf.prefixinator.commands;
 import com.happyzleaf.prefixinator.config.Config;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.LuckPermsProvider;
+import net.luckperms.api.cacheddata.CachedMetaData;
 import net.luckperms.api.model.group.Group;
 import net.luckperms.api.model.user.User;
-import net.luckperms.api.node.Node;
-import net.luckperms.api.node.types.MetaNode;
 import net.luckperms.api.node.types.PrefixNode;
 import org.bukkit.ChatColor;
 import org.bukkit.command.*;
@@ -16,6 +15,8 @@ import java.util.Collections;
 import java.util.List;
 
 import static com.happyzleaf.prefixinator.Prefixinator.META_GROUP_KEY;
+import static com.happyzleaf.prefixinator.Prefixinator.PREFIX_WEIGHT;
+import static com.happyzleaf.prefixinator.commands.PrefixCommand.CLEAR_ALL;
 
 public class RefreshPrefixesCommand implements TabCompleter, CommandExecutor {
     private final Config config;
@@ -63,35 +64,28 @@ public class RefreshPrefixesCommand implements TabCompleter, CommandExecutor {
     }
 
     public static boolean refresh(LuckPerms luck, User user) {
-        MetaNode meta = null;
+        CachedMetaData meta = user.getCachedData().getMetaData();
+        String prefix = meta.getPrefixes().get(PREFIX_WEIGHT);
+        if (prefix == null) return false;
 
-        boolean modified = false;
-        for (Node node : user.data().toCollection()) {
-            if (node instanceof PrefixNode) {
-                if (user.data().remove(node).wasSuccessful()) {
-                    modified = true;
-                }
-            } else if (node instanceof MetaNode && META_GROUP_KEY.equals(((MetaNode) node).getMetaKey())) {
-                meta = (MetaNode) node;
-                if (user.data().remove(node).wasSuccessful()) {
-                    modified = true;
-                }
-            }
-        }
-        if (meta == null) return modified;
+        String groupName = meta.getMetaValue(META_GROUP_KEY);
+        if (groupName == null) return false;
 
-        Group group = luck.getGroupManager().getGroup(meta.getMetaValue());
-        if (group == null) return true;
-
-        if (!user.getCachedData().getPermissionData().checkPermission("group." + group.getName()).asBoolean())
+        Group group = luck.getGroupManager().getGroup(groupName);
+        if (group == null || !user.getCachedData().getPermissionData().checkPermission("group." + group.getName()).asBoolean()) {
+            user.data().clear(CLEAR_ALL);
             return true;
+        }
 
-        String prefix = group.getCachedData().getMetaData().getPrefix();
-        if (prefix == null) return true;
+        String groupPrefix = group.getCachedData().getMetaData().getPrefix();
+        if (groupPrefix == null) {
+            user.data().clear(CLEAR_ALL);
+            return true;
+        }
 
-        user.data().add(MetaNode.builder(META_GROUP_KEY, group.getName()).build());
-        user.data().add(PrefixNode.builder(prefix, 9999).build());
+        if (prefix.equals(groupPrefix)) return false;
 
+        user.data().add(PrefixNode.builder(groupPrefix, PREFIX_WEIGHT).build());
         return true;
     }
 }
