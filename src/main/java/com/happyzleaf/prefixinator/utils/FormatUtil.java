@@ -18,7 +18,8 @@ public final class FormatUtil {
     private static final Pattern REPLACE_ALL_RGB_PATTERN = Pattern.compile("(&)?&#([0-9a-fA-F]{6})");
     private static final EnumSet<ChatColor> ALL = EnumSet.allOf(ChatColor.class);
 
-    private FormatUtil() {}
+    private FormatUtil() {
+    }
 
     //This is the general permission sensitive message format function
     public static BaseComponent[] format(final String input) {

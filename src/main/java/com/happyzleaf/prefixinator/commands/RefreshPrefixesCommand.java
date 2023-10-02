@@ -1,5 +1,6 @@
 package com.happyzleaf.prefixinator.commands;
 
+import com.happyzleaf.prefixinator.config.Config;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.LuckPermsProvider;
 import net.luckperms.api.model.group.Group;
@@ -17,7 +18,11 @@ import java.util.List;
 import static com.happyzleaf.prefixinator.Prefixinator.META_GROUP_KEY;
 
 public class RefreshPrefixesCommand implements TabCompleter, CommandExecutor {
-    public RefreshPrefixesCommand(PluginCommand command) {
+    private final Config config;
+
+    public RefreshPrefixesCommand(Config config, PluginCommand command) {
+        this.config = config;
+
         command.setTabCompleter(this);
         command.setExecutor(this);
     }
@@ -28,6 +33,14 @@ public class RefreshPrefixesCommand implements TabCompleter, CommandExecutor {
 
         if (args.length != 0) {
             sender.sendMessage(ChatColor.RED + "Usage /refreshprefixes");
+            return false;
+        }
+
+        try {
+            this.config.load();
+        } catch (Exception e) {
+            sender.sendMessage(ChatColor.RED + "Could not reload the config from path '" + config.path + "'. Check logs.");
+            e.printStackTrace();
             return false;
         }
 
@@ -70,7 +83,8 @@ public class RefreshPrefixesCommand implements TabCompleter, CommandExecutor {
         Group group = luck.getGroupManager().getGroup(meta.getMetaValue());
         if (group == null) return true;
 
-        if (!user.getCachedData().getPermissionData().checkPermission("group." + group.getName()).asBoolean()) return true;
+        if (!user.getCachedData().getPermissionData().checkPermission("group." + group.getName()).asBoolean())
+            return true;
 
         String prefix = group.getCachedData().getMetaData().getPrefix();
         if (prefix == null) return true;
