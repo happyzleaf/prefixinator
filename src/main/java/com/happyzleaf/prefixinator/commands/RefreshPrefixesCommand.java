@@ -39,6 +39,7 @@ public class RefreshPrefixesCommand implements TabCompleter, CommandExecutor {
 
         try {
             this.config.load();
+            sender.sendMessage(ChatColor.GREEN + "Reloaded config.");
         } catch (Exception e) {
             sender.sendMessage(ChatColor.RED + "Could not reload the config from path '" + config.path + "'. Check logs.");
             e.printStackTrace();

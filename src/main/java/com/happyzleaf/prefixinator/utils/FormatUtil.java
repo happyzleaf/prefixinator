@@ -26,10 +26,10 @@ public final class FormatUtil {
         if (input == null) {
             return null;
         }
-        return TextComponent.fromLegacyText(replaceColor(input));
+        return TextComponent.fromLegacyText(legacy(input));
     }
 
-    private static String replaceColor(final String input) {
+    public static String legacy(final String input) {
         final StringBuffer legacyBuilder = new StringBuffer();
         final Matcher legacyMatcher = REPLACE_ALL_PATTERN.matcher(input);
         legacyLoop:

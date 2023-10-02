@@ -32,6 +32,7 @@ import java.util.stream.Collectors;
 import static com.happyzleaf.prefixinator.Prefixinator.META_GROUP_KEY;
 import static com.happyzleaf.prefixinator.Prefixinator.PREFIX_WEIGHT;
 import static com.happyzleaf.prefixinator.utils.FormatUtil.format;
+import static com.happyzleaf.prefixinator.utils.FormatUtil.legacy;
 
 public class PrefixCommand implements TabCompleter, CommandExecutor {
     public static final Predicate<Node> CLEAR_ALL = n -> n instanceof PrefixNode || (n instanceof MetaNode && META_GROUP_KEY.equals(((MetaNode) n).getMetaKey()));
@@ -105,13 +106,13 @@ public class PrefixCommand implements TabCompleter, CommandExecutor {
                             String prefix = group.getCachedData().getMetaData().getPrefix();
                             if (prefix == null) return;
 
+                            // TODO: still not working
                             text.append(
-                                    new ComponentBuilder("")
+                                    new ComponentBuilder(legacy(this.config.getCommandBody().t.replace("{prefix}", prefix)))
                                             .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(ChatColor.LIGHT_PURPLE + "Click to apply")))
                                             .event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/prefixinator:prefix " + group.getName()))
                                             .create()
                             );
-                            text.append(format(this.config.getCommandBody().t.replace("{prefix}", prefix)));
                         });
                 text.append(this.config.getCommandFooter().c);
                 sender.spigot().sendMessage(text.create());
